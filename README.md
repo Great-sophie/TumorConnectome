@@ -59,7 +59,17 @@ The `scripit/` name is preserved from the current working project. The scripts a
 | 03–03c | Longitudinal SC–FC coupling and cognitive association | Main exploratory analyses |
 | 04–05 | Tumor-mask QC and SC/FC DK68 node alignment | Quality control |
 | 06a–06h | Candidate atlas construction, mask thresholds, clinical-volume comparisons, spatial and native-space QC | Exploratory / partially validated workflows |
-| 06i | Independent Native T1 → template registration experiments | **Unsuccessful exploratory registration; do not use as validated transforms** |
+| 06i | Independent Native T1 → template registration experiments | Initial 6/12-DOF tests failed anatomical QC; a later FSL MNI152 rigid-registration diagnostic improved gross orientation and preserved tumor volume in PAT23, but remains **unvalidated** |
+
+### Registration diagnostic (PAT23 only)
+
+A separate, exploratory registration investigation evaluated whether the native-space lesion could be transferred into a standard reference space:
+
+- Initial direct FLIRT registration to the FreeSurfer `cvs_avg35_inMNI152` reference produced anatomically implausible alignment. The 12-DOF result reduced the PAT23 lesion volume from **103.505 cm³** to approximately **48.24 cm³** at the candidate `>0.5` threshold; the original transform was rejected.
+- A subsequent diagnostic used the FSL `MNI152_T1_1mm` reference, first resampling native T1 by its existing image affine onto the reference grid and then estimating a constrained **6-DOF** rigid transform. The estimated matrix had **determinant ≈ 0.9999998**, with singular values near 1.
+- Applying this staged transform to the continuous native tumor mask yielded a thresholded volume of **103.174 cm³**, compared with **103.505 cm³** in native space (approximately **99.68% volume retention**). The gross anterior lesion location was visually plausible.
+- **This is a single-subject technical diagnostic, not validated anatomical normalization.** Rigid-body volume preservation and plausible lesion location do not establish accurate voxelwise registration. The original BTC standard-space template, transform provenance, exact DK68 correspondence, and cohort-wide registration quality remain unverified. No patient-specific or derived template-space transforms from these experiments are endorsed for regional tumor-burden inference.
+- The staged method uses an *additional* transform estimated from an already-resampled T1. Its FLIRT matrix **must not be applied directly to the original native mask** without accounting for that initialization. Experimental image outputs and matrices are not distributed with the code release.
 
 **Important:** Verifying that two images have matching grid dimensions and affines does **not** independently establish that they originate from the same anatomical template. The candidate voxelwise DK68 atlas was **not** accepted for quantitative tumor-to-DK68 regional-burden analysis.
 
@@ -91,7 +101,7 @@ Not every script is guaranteed to expose `--help` or operate as a standalone com
 - Tumor masks can contain low positive interpolation values: `>0` may greatly inflate apparent volume. A threshold of `>0.5` showed better agreement with clinical volumes in the local cohort, but it is **not independently validated as a universal segmentation threshold**.
 - Native T1–tumor-mask geometric resampling checks found no automatic red flags in 25 patients; this is not equivalent to expert segmentation validation.
 - Exact provenance of the supplied BTC MNI tumor-mask registration and identity of the FreeSurfer candidate reference template have not been established.
-- Exploratory FLIRT registration tests for PAT23 produced gross anatomical mismatch. These transforms are **not suitable** for anatomical inference or regional tumor-burden quantification.
+- Initial direct FLIRT registration tests for PAT23 produced gross anatomical mismatch. A later FSL MNI152 constrained rigid-registration diagnostic preserved approximately 99.68% of the thresholded tumor volume and improved gross lesion orientation, but **was not independently validated for accurate regional localization**. None of these experimental transforms is approved for regional tumor-burden quantification.
 
 ## Data citation
 
