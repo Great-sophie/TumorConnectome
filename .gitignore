@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+.env
+.env.*
+
+# MRI data
+*.nii
+*.nii.gz
+*.mgz
+*.mif
+*.tck
+*.trk
+*.h5
+*.mat
+
+# Data and local outputs
+results/
+references/
+data/
+datasets/
+derivatives/
+clinical/
+raw/
+
+# Archives and logs
+*.zip
+*.tar
+*.log
+
+# Personal documents
+*.docx
+*.pdf
