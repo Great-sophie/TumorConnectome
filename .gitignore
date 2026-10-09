@@ -1,12 +1,16 @@
-# Python
 __pycache__/
 *.pyc
 .pytest_cache/
-.venv/
 .env
 .env.*
+.venv/
 
-# MRI data
+results/
+references/
+data/
+datasets/
+derivatives/
+
 *.nii
 *.nii.gz
 *.mgz
@@ -15,21 +19,8 @@ __pycache__/
 *.trk
 *.h5
 *.mat
-
-# Data and local outputs
-results/
-references/
-data/
-datasets/
-derivatives/
-clinical/
-raw/
-
-# Archives and logs
 *.zip
-*.tar
 *.log
 
-# Personal documents
 *.docx
 *.pdf
