@@ -91,7 +91,8 @@ def safe_corr(a, b, how):
 
 def coupling(sc, fc, deconv):
     tri = np.triu_indices(68, k=1)
-    s, f, fd = sc[tri], fc[tri], deconv[tri]
+    s, f = sc[tri], fc[tri]
+    fd = deconv[tri] if deconv is not None else None
     connected = s > 0
     return {
         'spearman_all': safe_corr(s, f, 'spearman'),
@@ -99,7 +100,7 @@ def coupling(sc, fc, deconv):
         'spearman_connected': safe_corr(s[connected], f[connected], 'spearman'),
         # log1p is monotonic, hence Spearman invariance is expected; serves as a check.
         'spearman_log1p_all': safe_corr(np.log1p(s), f, 'spearman'),
-        'spearman_deconv_all': safe_corr(s, fd, 'spearman'),
+        'spearman_deconv_all': safe_corr(s, fd, 'spearman') if fd is not None else float('nan'),
         'n_edges_all': int(len(s)), 'n_edges_connected': int(connected.sum()),
     }
 
@@ -201,7 +202,10 @@ def main():
     if len(ids)!=len(set(ids)):
         raise SystemExit('Duplicate subject identifiers in cohort')
     pre=args.root/'Child/openneuro_BTC_preop/derivatives/TVB'
-    post=args.root/'Child/openneuro BTC_postop/derivatives/TVB'
+    post=args.root/'Child/openneuro_BTC_postop/derivatives/TVB'
+    if not post.is_dir():
+        alt=args.root/'Child/openneuro BTC_postop/derivatives/TVB'
+        if alt.is_dir(): post=alt
     if not pre.is_dir() or not post.is_dir():
         raise SystemExit('BTC TVB input directories not found; check --root')
     records=[]; exclusions=[]
@@ -218,7 +222,10 @@ def main():
                 sc=matrix(path/'SCthrAn.mat',KEYS['sc'],'sc')
                 fdata=path/'FC.mat'
                 fc=matrix(fdata,KEYS['fc'],'fc')
-                deconv=matrix(fdata,KEYS['fc_deconv'],'fc')
+                try:
+                    deconv=matrix(fdata,KEYS['fc_deconv'],'fc')
+                except (KeyError, ValueError):
+                    deconv=None  # optional sensitivity outcome only
                 metrics=coupling(sc,fc,deconv)
                 if not np.isfinite(metrics[PRIMARY]):
                     raise ValueError('Undefined primary correlation')
@@ -274,7 +281,7 @@ def main():
              'scan_records':len(records), 'primary_paired_patients':sum(x['group']=='patient' and x['method']==PRIMARY for x in changes),
              'primary_paired_controls':sum(x['group']=='control' and x['method']==PRIMARY for x in changes),
              'exclusion_records':len(exclusions),
-             'notes':['Exploratory inference; no causal claims','DK68 ordering not independently validated',
+             'notes':['Exploratory inference; no causal claims','DK68 SC/FC node ordering checked separately in Phase 05b v2; voxelwise atlas alignment remains unverified',
                       'Group-label permutation assumes exchangeability; confounding not adjusted',
                       'No edge-wise tests; edges are not independent individuals',
                       'SC zeros retained in primary; connected-only and deconvolved FC are sensitivity checks',

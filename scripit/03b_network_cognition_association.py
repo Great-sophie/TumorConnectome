@@ -165,8 +165,8 @@ def main():
     summary={'method':args.method,'seed':args.seed,'permutations':args.permutations,'bootstraps':args.bootstraps,
              'primary_cognitive_metric':PRIMARY,'matched_records':len(matched),'results':stats,
              'notes':['Unadjusted exploratory analysis; no causal inference or predictive validation.',
-                      'RVP_A is a pre-specified candidate in this workflow, not a prospectively registered endpoint.',
-                      'The FDR correction applies to four secondary outcomes within each group; RVP_A is reported separately.',
+                      'RVP_A is a selected exploratory candidate, not a prospectively registered endpoint.',
+                      'BH correction is shown for four other outcomes within each group; treating RVP_A separately does not control selection multiplicity.',
                       'Separate within-group correlations do not establish a group-interaction difference.',
                       'Potential regression to the mean, test-retest effects, follow-up interval and confounding remain.',
                       'DK68 ordering and imaging registration remain unverified.',
@@ -182,9 +182,9 @@ def main():
            'Inference: within-group, unadjusted, exploratory; cognitive delta = post − pre','']
     for r in stats:
         lines.append(f"{r['group']:7s} {r['metric']:20s} n={r['n']:2d} rho={r['rho']:+.4f} CI=[{r['ci95_low']:+.4f},{r['ci95_high']:+.4f}] p={r['permutation_p']:.4f} q_secondary={r['fdr_bh_q']:.4f}")
-    lines+=['','NOTE: All p-values exploratory. RVP_A designated primary candidate before inspecting associations.',
+    lines+=['','NOTE: All p-values exploratory. RVP_A not prospectively preregistered; selected-candidate inference requires multiplicity caution.',
             'NOTE: No cognitive improvement direction inferred; no clinical or causal claims.',
-            'NOTE: Node identity and follow-up intervals remain unverified.']
+            'NOTE: DK68 node order was checked in Phase 05b v2; imaging space alignment and follow-up confounding remain unresolved.']
     (out/'analysis_summary.txt').write_text('\n'.join(lines)+'\n',encoding='utf-8')
     print('\n'.join(lines));print(f'\nWrote outputs to {out}')
 
